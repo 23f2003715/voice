@@ -1,13 +1,16 @@
+```python
 import os
 import json
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = FastAPI()
 
@@ -33,26 +36,13 @@ Invoice:
 {req.text}
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4.1",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are an invoice extraction engine. Output only JSON."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        response_format={
-            "type": "json_schema",
-            "json_schema": {
-                "name": "invoice",
-                "schema": req.schema,
-                "strict": True
-            }
-        }
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json"
+        ),
     )
 
-    return json.loads(response.choices[0].message.content)
+    return json.loads(response.text)
+```
