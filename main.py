@@ -1,4 +1,4 @@
-```python
+
 import os
 import json
 
@@ -45,4 +45,4 @@ Invoice:
     )
 
     return json.loads(response.text)
-```
+
